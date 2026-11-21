@@ -1,0 +1,58 @@
+{
+  "changes": [
+    {
+      "index": 0,
+      "change": "Update the pricing section to reflect a 10% increase across all tiers",
+      "scope": "local",
+      "status": "applied",
+      "blockIds": [
+        "B8",
+        "B9",
+        "B10",
+        "B344"
+      ],
+      "notes": [
+        "The pricing table and related pricing details must be updated to reflect a 10% increase across all tiers, including derived values and examples."
+      ]
+    },
+    {
+      "index": 1,
+      "change": "Remove the paragraph about the legacy API",
+      "scope": "local",
+      "status": "applied",
+      "blockIds": [
+        "B21",
+        "B22"
+      ],
+      "notes": [
+        "The paragraph about the legacy API is in B21 and referenced in B22; both should be removed to fully eliminate mention of the legacy API."
+      ]
+    },
+    {
+      "index": 2,
+      "change": "Make the tone throughout more formal",
+      "scope": "global",
+      "status": "partial",
+      "blockIds": [],
+      "notes": [
+        "The request is to make the tone more formal throughout the entire document, which is a global style change.",
+        "left unchanged: B4 (B4: numbers must be preserved as numerals in a style-only change (missing: 3; added: none). Keep every original number and do not introduce new ones; use words instead (e.g. \"around the clock\", not \"24/7\").)"
+      ]
+    }
+  ],
+  "usage": {
+    "calls": 20,
+    "inputTokens": 35829,
+    "outputTokens": 17711
+  },
+  "timingsMs": {
+    "plan": 2387,
+    "local": 1654,
+    "global": 22733,
+    "total": 26775
+  },
+  "documentWords": {
+    "before": 9600,
+    "after": 9353
+  }
+}

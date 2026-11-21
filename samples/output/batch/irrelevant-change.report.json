@@ -1,0 +1,41 @@
+{
+  "changes": [
+    {
+      "index": 0,
+      "change": "Remove the section about GraphQL subscriptions",
+      "scope": "global",
+      "status": "not_applicable",
+      "blockIds": [],
+      "notes": [
+        "There is no section about GraphQL subscriptions in the document."
+      ]
+    },
+    {
+      "index": 1,
+      "change": "Change the support email to support@northwind.example",
+      "scope": "local",
+      "status": "applied",
+      "blockIds": [
+        "B34"
+      ],
+      "notes": [
+        "The support email appears in block B34 and should be updated as requested."
+      ]
+    }
+  ],
+  "usage": {
+    "calls": 2,
+    "inputTokens": 2048,
+    "outputTokens": 160
+  },
+  "timingsMs": {
+    "plan": 1075,
+    "local": 927,
+    "global": 0,
+    "total": 2002
+  },
+  "documentWords": {
+    "before": 777,
+    "after": 777
+  }
+}

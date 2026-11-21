@@ -1,0 +1,26 @@
+{
+  "name": "llm-doc-updater",
+  "version": "1.0.0",
+  "description": "Apply natural-language change requests to long documents with an LLM, reliably.",
+  "main": "src/index.ts",
+  "scripts": {
+    "update": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "generate:sample": "tsx scripts/generate-large-sample.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "openai": "^6.49.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "license": "MIT"
+}

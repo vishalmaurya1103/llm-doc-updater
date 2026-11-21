@@ -1,0 +1,57 @@
+{
+  "changes": [
+    {
+      "index": 0,
+      "change": "Update the pricing section to reflect a 10% increase across all tiers",
+      "scope": "local",
+      "status": "applied",
+      "blockIds": [
+        "B8",
+        "B9",
+        "B10",
+        "B30",
+        "B31"
+      ],
+      "notes": [
+        "These blocks contain pricing details and references that must be updated to reflect a 10% increase."
+      ]
+    },
+    {
+      "index": 1,
+      "change": "Remove the paragraph about the legacy API",
+      "scope": "local",
+      "status": "applied",
+      "blockIds": [
+        "B21"
+      ],
+      "notes": [
+        "This block is the paragraph about the legacy API and should be removed."
+      ]
+    },
+    {
+      "index": 2,
+      "change": "Make the tone throughout more formal",
+      "scope": "global",
+      "status": "applied",
+      "blockIds": [],
+      "notes": [
+        "The tone should be made more formal throughout the entire document."
+      ]
+    }
+  ],
+  "usage": {
+    "calls": 6,
+    "inputTokens": 11180,
+    "outputTokens": 4190
+  },
+  "timingsMs": {
+    "plan": 2468,
+    "local": 1596,
+    "global": 21507,
+    "total": 25573
+  },
+  "documentWords": {
+    "before": 777,
+    "after": 747
+  }
+}

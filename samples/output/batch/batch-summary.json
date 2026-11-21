@@ -1,0 +1,17 @@
+[
+  {
+    "id": "irrelevant-change",
+    "status": "ok",
+    "detail": "not_applicable, applied | 2 calls, 2048/160 tokens, 2.0s"
+  },
+  {
+    "id": "northwind-guide-large",
+    "status": "needs_review",
+    "detail": "applied, applied, partial | 20 calls, 35829/17711 tokens, 26.8s"
+  },
+  {
+    "id": "northwind-guide",
+    "status": "needs_review",
+    "detail": "applied, applied, partial | 6 calls, 5354/1866 tokens, 14.4s"
+  }
+]

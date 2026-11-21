@@ -1,0 +1,59 @@
+{
+  "changes": [
+    {
+      "index": 0,
+      "change": "Update the pricing section to reflect a 10% increase across all tiers",
+      "scope": "local",
+      "status": "applied",
+      "blockIds": [
+        "B8",
+        "B9",
+        "B10",
+        "B343",
+        "B344"
+      ],
+      "notes": [
+        "The pricing table and related mentions must be updated to reflect a 10% increase across all tiers and derived values."
+      ]
+    },
+    {
+      "index": 1,
+      "change": "Remove the paragraph about the legacy API",
+      "scope": "local",
+      "status": "applied",
+      "blockIds": [
+        "B21",
+        "B22"
+      ],
+      "notes": [
+        "The paragraph about the legacy API is in B21 and referenced in B22, so both must be removed or revised."
+      ]
+    },
+    {
+      "index": 2,
+      "change": "Make the tone throughout more formal",
+      "scope": "global",
+      "status": "partial",
+      "blockIds": [],
+      "notes": [
+        "The tone must be made more formal throughout the entire document.",
+        "left unchanged: B170, B172, B181 (B170: structure changed from heading(4) to paragraph; B170: numbers must be preserved as numerals in a style-only change (missing: 5; added: none); B172: structure changed from heading(3) to paragraph; B181: structure changed from heading(4) to paragraph)"
+      ]
+    }
+  ],
+  "usage": {
+    "calls": 22,
+    "inputTokens": 52369,
+    "outputTokens": 23825
+  },
+  "timingsMs": {
+    "plan": 2080,
+    "local": 1711,
+    "global": 26224,
+    "total": 30016
+  },
+  "documentWords": {
+    "before": 9600,
+    "after": 9370
+  }
+}
