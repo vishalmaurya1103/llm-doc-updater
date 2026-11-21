@@ -29,7 +29,7 @@ Blocks nobody asked to change never go back through the model, so they come out 
 
 Output tokens are what's slow and expensive, so I kept them tied to how much text changes, not to document size.
 
-In short: input tokens grow linearly with the document, since the planner reads it once. Output tokens grow only with how much text changes. Document-wide changes like tone are the exception, and their output grows with the document too.
+Input tokens grow linearly with the document, since the planner reads it once. Output tokens grow only with how much text changes. Document-wide changes like tone are the exception, and their output grows with the document too.
 
 | Document    | Changes              | Calls | Tokens in / out | Time  |
 | ----------- | -------------------- | ----- | --------------- | ----- |
@@ -113,7 +113,7 @@ A smaller real example: the table rounded $53.90 to `$54`, but the yearly price 
 
 ## Decisions
 
-Alternatives I didn't go with:
+Alternatives my coding agent proposed that I didn't go with:
 
 - **Rewrite the whole document and diff it.** Simplest, but it pays for every token on every change, it's the slowest, and a diff only spots drift after the fact.
 - **Search-and-replace snippets** (the model quotes the old text, like Aider). The closest call. I passed because models often copy the old text slightly wrong (whitespace, curly quotes) and then it doesn't match. A block id is much harder to get wrong.
