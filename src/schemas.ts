@@ -14,10 +14,16 @@ export const DEFAULT_LIMITS: InputLimits = {
 
 export function createRequestSchema(limits: InputLimits = DEFAULT_LIMITS) {
   return z.object({
-    sourceDocument: z.string().max(limits.maxDocumentChars, `sourceDocument exceeds ${limits.maxDocumentChars} characters`),
+    sourceDocument: z
+      .string()
+      .max(limits.maxDocumentChars, `sourceDocument exceeds ${limits.maxDocumentChars} characters`),
     changes: z
       .array(
-        z.string().trim().min(1).max(limits.maxChangeChars, `each change must be at most ${limits.maxChangeChars} characters`),
+        z
+          .string()
+          .trim()
+          .min(1)
+          .max(limits.maxChangeChars, `each change must be at most ${limits.maxChangeChars} characters`),
       )
       .max(limits.maxChanges, `at most ${limits.maxChanges} changes per request`),
   });

@@ -102,7 +102,9 @@ export async function updateDocument(request: UpdateRequest, options: UpdateOpti
   for (const { job, outcome } of localResults) {
     const jobReports = job.changeIndexes.map((index) => reports[index]!);
     if (!outcome.ok) {
-      jobReports.forEach((report) => report.notes.push(`edit rejected after ${outcome.attempts} attempts`, ...outcome.errors));
+      jobReports.forEach((report) =>
+        report.notes.push(`edit rejected after ${outcome.attempts} attempts`, ...outcome.errors),
+      );
       continue;
     }
     localEdits.push(...outcome.value.edits);
@@ -119,7 +121,10 @@ export async function updateDocument(request: UpdateRequest, options: UpdateOpti
   if (global.length > 0) {
     stageStart = performance.now();
     const chunkResults = await runGlobalPass(ctx, blocks, changes, global);
-    blocks = applyEdits(blocks, chunkResults.flatMap((result) => result.edits));
+    blocks = applyEdits(
+      blocks,
+      chunkResults.flatMap((result) => result.edits),
+    );
 
     const totalBlocks = chunkResults.reduce((sum, result) => sum + result.blockIds.length, 0);
     const rejected = chunkResults.flatMap((result) => result.rejectedIds);

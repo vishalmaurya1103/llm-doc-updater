@@ -4,8 +4,14 @@ import { updateDocument } from "../src/pipeline.ts";
 import type { TraceEvent } from "../src/structured.ts";
 import { DOC, plan, ScriptedLlm } from "./helpers.ts";
 
-const PRICES_UP = { id: "B4", action: "replace", text: "Starter costs $53.90 per month and Team costs $218.90 per month.", changeIndexes: [0] };
-const run = (llm: ScriptedLlm, changes: string[]) => updateDocument({ sourceDocument: DOC, changes }, { llm, concurrency: 2 });
+const PRICES_UP = {
+  id: "B4",
+  action: "replace",
+  text: "Starter costs $53.90 per month and Team costs $218.90 per month.",
+  changeIndexes: [0],
+};
+const run = (llm: ScriptedLlm, changes: string[]) =>
+  updateDocument({ sourceDocument: DOC, changes }, { llm, concurrency: 2 });
 
 describe("updateDocument", () => {
   it("applies a local edit and leaves every other byte untouched", async () => {
@@ -55,7 +61,10 @@ describe("updateDocument", () => {
     });
     await run(llm, ["Raise prices by 10%"]);
 
-    assert.deepEqual(llm.callsFor("local_edits").map((r) => r.model), ["gpt-4.1-mini", "gpt-4.1-mini", "gpt-4.1"]);
+    assert.deepEqual(
+      llm.callsFor("local_edits").map((r) => r.model),
+      ["gpt-4.1-mini", "gpt-4.1-mini", "gpt-4.1"],
+    );
   });
 
   it("isolates a failing change: others still apply and the original text is kept", async () => {
@@ -63,12 +72,18 @@ describe("updateDocument", () => {
       edit_plan: [plan({ index: 0, blockIds: ["B4"] }, { index: 1, blockIds: ["B6"] })],
       local_edits: [
         { edits: [PRICES_UP], unapplied: [] },
-        ...Array(3).fill({ edits: [{ id: "B6", action: "replace", text: "Sure, here you go!", changeIndexes: [1] }], unapplied: [] }),
+        ...Array(3).fill({
+          edits: [{ id: "B6", action: "replace", text: "Sure, here you go!", changeIndexes: [1] }],
+          unapplied: [],
+        }),
       ],
     });
     const { document, report } = await run(llm, ["Raise prices by 10%", "Reword the legacy API note"]);
 
-    assert.deepEqual(report.changes.map((c) => c.status), ["applied", "failed"]);
+    assert.deepEqual(
+      report.changes.map((c) => c.status),
+      ["applied", "failed"],
+    );
     assert.match(document, /\$53\.90/);
     assert.match(document, /The legacy v1 API uses query-string keys and is deprecated\./);
   });
@@ -95,7 +110,11 @@ describe("updateDocument", () => {
 
   it("rejects a style-only rewrite that alters numbers and retries only that block", async () => {
     const keepAll = (ids: string[]) => ids.map((id) => ({ id, action: "keep", text: "" }));
-    const tamperedB4 = { id: "B4", action: "replace", text: "The Starter plan costs $59 per month; the Team plan costs $199 per month." };
+    const tamperedB4 = {
+      id: "B4",
+      action: "replace",
+      text: "The Starter plan costs $59 per month; the Team plan costs $199 per month.",
+    };
     const llm = new ScriptedLlm({
       edit_plan: [plan({ index: 0, scope: "global", styleOnly: true })],
       global_edits: [

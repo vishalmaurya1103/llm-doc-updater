@@ -28,9 +28,9 @@ export interface StructuredCall<S extends z.ZodObject> {
   validate: (value: z.infer<S>) => string[];
 }
 
-export type StructuredResult<T> =
-  | { ok: true; value: T; attempts: number }
-  | { ok: false; errors: string[]; attempts: number; lastValue?: T };
+type Success<T> = { ok: true; value: T; attempts: number };
+type Failure<T> = { ok: false; errors: string[]; attempts: number; lastValue?: T };
+export type StructuredResult<T> = Success<T> | Failure<T>;
 
 const MAX_TRACED_OUTPUT_CHARS = 4_000;
 
@@ -54,7 +54,13 @@ export async function callStructured<S extends z.ZodObject>(
     const model = attempt === policy.maxAttempts && attempt > 1 ? policy.fallback : policy.primary;
     const reject = (reasons: string[], output: string | null) => {
       errors = reasons;
-      env.trace?.({ stage: call.schemaName, attempt, model, errors: reasons, output: output?.slice(0, MAX_TRACED_OUTPUT_CHARS) ?? null });
+      env.trace?.({
+        stage: call.schemaName,
+        attempt,
+        model,
+        errors: reasons,
+        output: output?.slice(0, MAX_TRACED_OUTPUT_CHARS) ?? null,
+      });
     };
 
     let text: string;
@@ -83,7 +89,9 @@ export async function callStructured<S extends z.ZodObject>(
 
     const checked = parseAndValidate(text, call);
     if (checked.value !== undefined) lastValue = checked.value;
-    if (checked.value !== undefined && checked.errors.length === 0) return { ok: true, value: checked.value, attempts: attempt };
+    if (checked.value !== undefined && checked.errors.length === 0) {
+      return { ok: true, value: checked.value, attempts: attempt };
+    }
     reject(checked.errors, text);
 
     messages.push(

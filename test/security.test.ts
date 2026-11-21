@@ -14,7 +14,10 @@ describe("input limits", () => {
       updateDocument({ sourceDocument: "x".repeat(400_001), changes: ["Fix typos"] }, { llm }),
       (error) => error instanceof ZodError && /exceeds 400000 characters/.test(error.message),
     );
-    await assert.rejects(updateDocument({ sourceDocument: DOC, changes: Array(51).fill("Fix typos") }, { llm }), ZodError);
+    await assert.rejects(
+      updateDocument({ sourceDocument: DOC, changes: Array(51).fill("Fix typos") }, { llm }),
+      ZodError,
+    );
     assert.equal(llm.requests.length, 0);
   });
 
@@ -102,7 +105,14 @@ describe("updateDocuments (batch)", () => {
       { llm, documentConcurrency: 2 },
     );
 
-    assert.deepEqual(outcomes.map((o) => [o.id, o.ok]), [["good", true], ["too-big", false], ["unreadable", false]]);
+    assert.deepEqual(
+      outcomes.map((o) => [o.id, o.ok]),
+      [
+        ["good", true],
+        ["too-big", false],
+        ["unreadable", false],
+      ],
+    );
     assert.match(outcomes[1]!.ok ? "" : outcomes[1]!.error, /invalid request: .*exceeds 400000 characters/s);
   });
 });

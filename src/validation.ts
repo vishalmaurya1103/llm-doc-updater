@@ -3,7 +3,8 @@ import type { GlobalEdits, LocalEdits, Plan } from "./schemas.ts";
 import type { Block } from "./types.ts";
 
 const BLOCK_MARKER = /\[\[B\d+(?:\.\d+)?\]\]/;
-const ASSISTANT_PREAMBLE = /^(?:sure|certainly|of course)\b[,!.]|^here(?:'s| is) (?:the|your) (?:updated|revised|rewritten|edited)\b/i;
+const ASSISTANT_PREAMBLE =
+  /^(?:sure|certainly|of course)\b[,!.]|^here(?:'s| is) (?:the|your) (?:updated|revised|rewritten|edited)\b/i;
 
 export function validatePlan(plan: Plan, changeCount: number, knownIds: Set<string>): string[] {
   const errors: string[] = [];
@@ -27,11 +28,7 @@ export function validatePlan(plan: Plan, changeCount: number, knownIds: Set<stri
   return errors;
 }
 
-export function validateLocalEdits(
-  result: LocalEdits,
-  targets: Map<string, Block>,
-  changeIndexes: number[],
-): string[] {
+export function validateLocalEdits(result: LocalEdits, targets: Map<string, Block>, changeIndexes: number[]): string[] {
   const errors: string[] = [];
   const covered = new Set<number>();
   const rewritten = new Set<string>();
@@ -39,7 +36,9 @@ export function validateLocalEdits(
   for (const edit of result.edits) {
     const original = targets.get(edit.id);
     if (!original) {
-      errors.push(`edit references ${edit.id}, which is not a target block (targets: ${[...targets.keys()].join(", ")})`);
+      errors.push(
+        `edit references ${edit.id}, which is not a target block (targets: ${[...targets.keys()].join(", ")})`,
+      );
       continue;
     }
 
@@ -56,7 +55,8 @@ export function validateLocalEdits(
       if (edit.action === "replace") errors.push(...checkLengthRatio(edit.id, original.text, edit.text, 0.2, 5));
     }
 
-    const effective = edit.action !== "keep" && !(edit.action === "replace" && edit.text.trim() === original.text.trim());
+    const effective =
+      edit.action !== "keep" && !(edit.action === "replace" && edit.text.trim() === original.text.trim());
     if (effective) edit.changeIndexes.forEach((i) => covered.add(i));
   }
 
@@ -72,7 +72,9 @@ export function validateLocalEdits(
 export function validateGlobalCoverage(result: GlobalEdits, chunk: Block[]): string[] {
   const expected = chunk.map((block) => block.id).join(", ");
   const actual = result.edits.map((edit) => edit.id).join(", ");
-  return expected === actual ? [] : [`edits must cover exactly these block ids in order: ${expected}; received: ${actual}`];
+  return expected === actual
+    ? []
+    : [`edits must cover exactly these block ids in order: ${expected}; received: ${actual}`];
 }
 
 export function validateGlobalEdit(edit: GlobalEdits["edits"][number], original: Block, styleOnly: boolean): string[] {

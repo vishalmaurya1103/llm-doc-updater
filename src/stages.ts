@@ -2,7 +2,7 @@ import { countWords, renderTagged } from "./blocks.ts";
 import { mapWithConcurrency } from "./concurrency.ts";
 import type { LlmClient } from "./llm.ts";
 import { formatChanges, GLOBAL_EDITOR_PROMPT, LOCAL_EDITOR_PROMPT, PLANNER_PROMPT } from "./prompts.ts";
-import { GlobalEditsSchema, LocalEditsSchema, PlanSchema, type PlannedChange } from "./schemas.ts";
+import { GlobalEditsSchema, LocalEditsSchema, PlanSchema, type LocalEdits, type PlannedChange } from "./schemas.ts";
 import { callStructured, type CallEnvironment, type ModelPolicy, type StructuredResult } from "./structured.ts";
 import type { Block, Edit } from "./types.ts";
 import { validateGlobalCoverage, validateGlobalEdit, validateLocalEdits, validatePlan } from "./validation.ts";
@@ -23,7 +23,7 @@ export interface LocalJob {
 
 export interface LocalJobResult {
   job: LocalJob;
-  outcome: StructuredResult<{ edits: Edit[]; unapplied: { changeIndex: number; reason: string }[] }>;
+  outcome: StructuredResult<LocalEdits>;
 }
 
 export interface GlobalChunkResult {
@@ -37,19 +37,29 @@ const indexed = (changes: string[], indexes: number[]) => indexes.map((index) =>
 
 export async function planChanges(ctx: StageContext, blocks: Block[], changes: string[]) {
   const knownIds = new Set(blocks.map((block) => block.id));
-  return callStructured(ctx.llm, ctx.plannerPolicy, {
-    schema: PlanSchema,
-    schemaName: "edit_plan",
-    maxOutputTokens: 400 + changes.length * 300,
-    messages: [
-      { role: "system", content: PLANNER_PROMPT },
-      {
-        role: "user",
-        content: `<document>\n${renderTagged(blocks)}\n</document>\n\nRequested changes:\n${formatChanges(indexed(changes, changes.map((_, i) => i)))}`,
-      },
-    ],
-    validate: (plan) => validatePlan(plan, changes.length, knownIds),
-  }, ctx.env);
+  return callStructured(
+    ctx.llm,
+    ctx.plannerPolicy,
+    {
+      schema: PlanSchema,
+      schemaName: "edit_plan",
+      maxOutputTokens: 400 + changes.length * 300,
+      messages: [
+        { role: "system", content: PLANNER_PROMPT },
+        {
+          role: "user",
+          content: `<document>\n${renderTagged(blocks)}\n</document>\n\nRequested changes:\n${formatChanges(
+            indexed(
+              changes,
+              changes.map((_, i) => i),
+            ),
+          )}`,
+        },
+      ],
+      validate: (plan) => validatePlan(plan, changes.length, knownIds),
+    },
+    ctx.env,
+  );
 }
 
 export function groupLocalChanges(planned: PlannedChange[], blocks: Block[]): LocalJob[] {
@@ -87,23 +97,28 @@ export async function runLocalJobs(
       .filter((block): block is Block => block !== undefined && !targets.has(block.id));
     const targetChars = [...targets.values()].reduce((sum, block) => sum + block.text.length, 0);
 
-    const outcome = await callStructured(ctx.llm, ctx.editorPolicy, {
-      schema: LocalEditsSchema,
-      schemaName: "local_edits",
-      maxOutputTokens: Math.min(16_000, 1_000 + Math.ceil(targetChars / 2)),
-      messages: [
-        { role: "system", content: LOCAL_EDITOR_PROMPT },
-        {
-          role: "user",
-          content: [
-            `Requested changes:\n${formatChanges(indexed(changes, job.changeIndexes))}`,
-            `<target_blocks>\n${renderTagged([...targets.values()])}\n</target_blocks>`,
-            `<context_blocks>\n${context.length ? renderTagged(context) : "(none)"}\n</context_blocks>`,
-          ].join("\n\n"),
-        },
-      ],
-      validate: (result) => validateLocalEdits(result, targets, job.changeIndexes),
-    }, ctx.env);
+    const outcome = await callStructured(
+      ctx.llm,
+      ctx.editorPolicy,
+      {
+        schema: LocalEditsSchema,
+        schemaName: "local_edits",
+        maxOutputTokens: Math.min(16_000, 1_000 + Math.ceil(targetChars / 2)),
+        messages: [
+          { role: "system", content: LOCAL_EDITOR_PROMPT },
+          {
+            role: "user",
+            content: [
+              `Requested changes:\n${formatChanges(indexed(changes, job.changeIndexes))}`,
+              `<target_blocks>\n${renderTagged([...targets.values()])}\n</target_blocks>`,
+              `<context_blocks>\n${context.length ? renderTagged(context) : "(none)"}\n</context_blocks>`,
+            ].join("\n\n"),
+          },
+        ],
+        validate: (result) => validateLocalEdits(result, targets, job.changeIndexes),
+      },
+      ctx.env,
+    );
     return { job, outcome };
   });
 }
@@ -134,14 +149,24 @@ export async function runGlobalPass(
   planned: PlannedChange[],
 ): Promise<GlobalChunkResult[]> {
   const styleOnly = planned.every((entry) => entry.styleOnly);
-  const instructions = formatChanges(indexed(changes, planned.map((entry) => entry.index)));
+  const instructions = formatChanges(
+    indexed(
+      changes,
+      planned.map((entry) => entry.index),
+    ),
+  );
 
   return mapWithConcurrency(chunkBlocks(blocks, ctx.chunkWords), ctx.concurrency, (chunk) =>
     editChunk(ctx, chunk, instructions, styleOnly),
   );
 }
 
-async function editChunk(ctx: StageContext, chunk: Block[], instructions: string, styleOnly: boolean): Promise<GlobalChunkResult> {
+async function editChunk(
+  ctx: StageContext,
+  chunk: Block[],
+  instructions: string,
+  styleOnly: boolean,
+): Promise<GlobalChunkResult> {
   const { primary, fallback, maxAttempts } = ctx.editorPolicy;
   const accepted: Edit[] = [];
   let pending = chunk;
@@ -163,7 +188,11 @@ async function editChunk(ctx: StageContext, chunk: Block[], instructions: string
             role: "user",
             content: [
               `Document-wide changes:\n${instructions}`,
-              ...(feedback.length ? [`A previous attempt on these blocks was rejected; fix these issues:\n${feedback.map((e) => `- ${e}`).join("\n")}`] : []),
+              ...(feedback.length
+                ? [
+                    `A previous attempt on these blocks was rejected; fix these issues:\n${feedback.map((e) => `- ${e}`).join("\n")}`,
+                  ]
+                : []),
               `<chunk>\n${renderTagged(blocksToEdit)}\n</chunk>`,
             ].join("\n\n"),
           },

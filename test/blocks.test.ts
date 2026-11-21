@@ -9,7 +9,10 @@ describe("parseDocument / renderDocument", () => {
     const source = "\n# Title\n\nPara one\nline two\n\n\n- a\n- b\n\n| x |\n| - |\n\nEnd.\n";
     const parsed = parseDocument(source);
     assert.equal(renderDocument(parsed, parsed.blocks), source);
-    assert.deepEqual(parsed.blocks.map((b) => b.id), ["B1", "B2", "B3", "B4", "B5"]);
+    assert.deepEqual(
+      parsed.blocks.map((b) => b.id),
+      ["B1", "B2", "B3", "B4", "B5"],
+    );
   });
 
   it("keeps fenced code containing blank lines in a single block", () => {
@@ -63,6 +66,12 @@ describe("planning helpers", () => {
   });
 
   it("chunks blocks by word budget", () => {
-    assert.deepEqual(chunkBlocks(blocks, 2).map((chunk) => chunk.map((b) => b.id)), [["B1", "B2"], ["B3", "B4"]]);
+    assert.deepEqual(
+      chunkBlocks(blocks, 2).map((chunk) => chunk.map((b) => b.id)),
+      [
+        ["B1", "B2"],
+        ["B3", "B4"],
+      ],
+    );
   });
 });

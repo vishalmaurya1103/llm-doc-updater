@@ -68,7 +68,9 @@ async function main(): Promise<number> {
   if (values.batch) {
     return runBatch(values.batch, values["out-dir"] ?? "out/batch", {
       ...options,
-      ...(values["doc-concurrency"] ? { documentConcurrency: positiveInt(values["doc-concurrency"], "--doc-concurrency") } : {}),
+      ...(values["doc-concurrency"]
+        ? { documentConcurrency: positiveInt(values["doc-concurrency"], "--doc-concurrency") }
+        : {}),
       ...(trace ? { trace } : {}),
     });
   }
@@ -102,14 +104,21 @@ async function runBatch(dir: string, outDir: string, options: Parameters<typeof 
       onDocumentDone: async (outcome) => {
         if (outcome.ok) {
           await writeOutput(join(outDir, `${outcome.id}.md`), outcome.result.document);
-          await writeOutput(join(outDir, `${outcome.id}.report.json`), JSON.stringify(outcome.result.report, null, 2) + "\n");
+          await writeOutput(
+            join(outDir, `${outcome.id}.report.json`),
+            JSON.stringify(outcome.result.report, null, 2) + "\n",
+          );
         }
         console.error(`  ${outcome.id}: ${summarize(outcome)}`);
       },
     },
   );
 
-  const summary = outcomes.map((outcome) => ({ id: outcome.id, status: documentStatus(outcome), detail: summarize(outcome) }));
+  const summary = outcomes.map((outcome) => ({
+    id: outcome.id,
+    status: documentStatus(outcome),
+    detail: summarize(outcome),
+  }));
   await writeOutput(join(outDir, "batch-summary.json"), JSON.stringify(summary, null, 2) + "\n");
   const ok = summary.filter((entry) => entry.status === "ok").length;
   console.error(`\n${ok}/${summary.length} documents fully updated. Results in ${outDir}`);
